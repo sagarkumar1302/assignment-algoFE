@@ -13,7 +13,9 @@ const Manager = () => {
   const [editId, setEditId] = useState(null);
   const fetchPasswords = async () => {
     try {
-      const res = await axios.get("https://backend-password-manager-production.up.railway.app/api/users/");
+      const res = await axios.get(
+        "https://backend-password-manager-production.up.railway.app/api/users/"
+      );
       setPassArray(res.data);
     } catch (error) {
       console.error("Error fetching passwords:", error);
@@ -67,7 +69,10 @@ const Manager = () => {
         toast.success("Password updated successfully!");
       } else {
         // **Create new entry**
-        await axios.post("https://backend-password-manager-production.up.railway.app/api/users/register", payload);
+        await axios.post(
+          "https://backend-password-manager-production.up.railway.app/api/users/register",
+          payload
+        );
         toast.success("Password saved successfully!");
       }
 
@@ -157,10 +162,14 @@ const Manager = () => {
   };
   const deleteHandler = async () => {
     try {
-      await axios.delete(`https://backend-password-manager-production.up.railway.app/api/users/delete/${idDel}`);
+      await axios.delete(
+        `https://backend-password-manager-production.up.railway.app/api/users/delete/${idDel}`
+      );
       let updatedForm = passArray.filter((item) => item.id !== idDel);
       // setPassArray([...updatedForm]);
-      const { data } = await axios.get("https://backend-password-manager-production.up.railway.app/api/users");
+      const { data } = await axios.get(
+        "https://backend-password-manager-production.up.railway.app/api/users"
+      );
       setPassArray(data);
       setIsModalOpen(false);
       toast("🦄 Deleted Password", {
@@ -317,24 +326,26 @@ const Manager = () => {
                       </div>
                     </td>
                     <td className="py-2 border-1 w-32 text-center">
-                      <lord-icon
-                        src="https://cdn.lordicon.com/ifsxxxte.json"
-                        trigger="hover"
-                        colors="primary:blue"
-                        className="mr-3 cursor-pointer"
-                        onClick={() => {
-                          editHandler(items._id);
-                        }}
-                      ></lord-icon>
-                      <lord-icon
-                        src="https://cdn.lordicon.com/skkahier.json"
-                        trigger="hover"
-                        colors="primary:red"
-                        className="cursor-pointer"
-                        onClick={() => {
-                          handleDelete(items._id);
-                        }}
-                      ></lord-icon>
+                      <div className="flex justify-center md:flex-row flex-col md:gap-0 gap-2 items-center">
+                        <lord-icon
+                          src="https://cdn.lordicon.com/ifsxxxte.json"
+                          trigger="hover"
+                          colors="primary:blue"
+                          className="md:mr-3 cursor-pointer"
+                          onClick={() => {
+                            editHandler(items._id);
+                          }}
+                        ></lord-icon>
+                        <lord-icon
+                          src="https://cdn.lordicon.com/skkahier.json"
+                          trigger="hover"
+                          colors="primary:red"
+                          className="cursor-pointer"
+                          onClick={() => {
+                            handleDelete(items._id);
+                          }}
+                        ></lord-icon>
+                      </div>
                       <ConfirmModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
