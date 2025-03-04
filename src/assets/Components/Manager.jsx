@@ -13,7 +13,7 @@ const Manager = () => {
   const [editId, setEditId] = useState(null);
   const fetchPasswords = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/users/");
+      const res = await axios.get("https://backend-password-manager-production.up.railway.app/api/users/");
       setPassArray(res.data);
     } catch (error) {
       console.error("Error fetching passwords:", error);
@@ -61,13 +61,13 @@ const Manager = () => {
       if (editId) {
         // **Update existing entry**
         await axios.put(
-          `http://localhost:3000/api/users/update/${editId}`,
+          `https://backend-password-manager-production.up.railway.app/api/users/update/${editId}`,
           payload
         );
         toast.success("Password updated successfully!");
       } else {
         // **Create new entry**
-        await axios.post("http://localhost:3000/api/users/register", payload);
+        await axios.post("https://backend-password-manager-production.up.railway.app/api/users/register", payload);
         toast.success("Password saved successfully!");
       }
 
@@ -110,7 +110,7 @@ const Manager = () => {
   //     password: form.pass,  // Change to match backend
   //   };
   //   try {
-  //     const res = await axios.post("http://localhost:3000/api/users/register", payload);
+  //     const res = await axios.post("https://backend-password-manager-production.up.railway.app/api/users/register", payload);
   //     console.log(res.data);
   //     toast("🦄 Saved Password", {
   //       position: "top-right",
@@ -157,10 +157,10 @@ const Manager = () => {
   };
   const deleteHandler = async () => {
     try {
-      await axios.delete(`http://localhost:3000/api/users/delete/${idDel}`);
+      await axios.delete(`https://backend-password-manager-production.up.railway.app/api/users/delete/${idDel}`);
       let updatedForm = passArray.filter((item) => item.id !== idDel);
       // setPassArray([...updatedForm]);
-      const { data } = await axios.get("http://localhost:3000/api/users");
+      const { data } = await axios.get("https://backend-password-manager-production.up.railway.app/api/users");
       setPassArray(data);
       setIsModalOpen(false);
       toast("🦄 Deleted Password", {
