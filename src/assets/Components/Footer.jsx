@@ -2,7 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="shadow-inner shadow-white bg-black flex justify-center  px-4 py-5 absolute bottom-0 w-full">
+    <footer className="shadow-inner shadow-white bg-black flex justify-center  px-4 py-5 fixed bottom-0 w-full">
       <div className="container flex justify-between items-center">
         <div className="logo font-bold text-white text-xl md:text-3xl">
           <span className="text-green-400">&lt;</span>PassManager
