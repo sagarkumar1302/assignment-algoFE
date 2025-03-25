@@ -4,7 +4,7 @@ import ConfirmModal from "./ConfirmModal";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
-const host = "http://localhost:3000";
+const host = "https://assignment-algobe-production.up.railway.app";
 
 const Manager = () => {
   const [form, setForm] = useState({ title: "", description: "", completed: false });
