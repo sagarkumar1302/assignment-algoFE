@@ -1,368 +1,192 @@
-import React, { useState, useRef, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import ConfirmModal from "./ConfirmModal";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
+
+const host = "http://localhost:3000";
+
 const Manager = () => {
-  const ref = useRef();
-  const [show, setShow] = useState(false);
-  const [form, setForm] = useState({ appname: "", username: "", pass: "" });
-  const [passArray, setPassArray] = useState([]);
+  const [form, setForm] = useState({ title: "", description: "", completed: false });
+  const [tasks, setTasks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [idDel, setIddel] = useState();
+  const [idDel, setIdDel] = useState(null);
   const [editId, setEditId] = useState(null);
-  const fetchPasswords = async () => {
+
+  const fetchTasks = async () => {
     try {
-      const res = await axios.get(
-        "https://backend-password-manager-production.up.railway.app/api/users/"
-      );
-      setPassArray(res.data);
-    } catch (error) {
-      console.error("Error fetching passwords:", error);
-      toast.error("Error fetching passwords");
+      const { data } = await axios.get(`${host}/api/user/`);
+      setTasks(data);
+    } catch {
+      toast.error("Error fetching tasks");
     }
   };
 
-  // Ensure it runs when component mounts
   useEffect(() => {
-    fetchPasswords();
+    fetchTasks();
   }, []);
-  const showPassword = () => {
-    if (!show) {
-      ref.current.src = "./icons/hide.svg";
-    } else {
-      ref.current.src = "./icons/view.svg";
-    }
-    setShow(!show);
-  };
-  const savePassword = async () => {
-    if (
-      form.appname.trim() === "" ||
-      form.username.trim() === "" ||
-      form.pass.trim() === ""
-    ) {
-      toast("🦄 Please fill all the fields", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "dark",
-      });
+
+  const saveTask = async () => {
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.warn("Please fill all the fields");
       return;
     }
 
-    const payload = {
-      appname: form.appname,
-      username: form.username,
-      password: form.pass,
-    };
-
     try {
       if (editId) {
-        // **Update existing entry**
-        await axios.put(
-          `https://backend-password-manager-production.up.railway.app/api/users/update/${editId}`,
-          payload
-        );
-        toast.success("Password updated successfully!");
+        await axios.put(`${host}/api/user/update/${editId}`, form);
+        toast.success("Task updated successfully!");
       } else {
-        // **Create new entry**
-        await axios.post(
-          "https://backend-password-manager-production.up.railway.app/api/users/register",
-          payload
-        );
-        toast.success("Password saved successfully!");
+        await axios.post(`${host}/api/user/register`, form);
+        toast.success("Task saved successfully!");
       }
-
-      await fetchPasswords(); // **Fetch updated passwords after update**
-      setForm({ appname: "", username: "", pass: "" }); // Clear form
-      setEditId(null); // Reset edit mode
-    } catch (error) {
-      console.error(
-        "Error saving password:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to save password!");
+      fetchTasks();
+      setForm({ title: "", description: "", completed: false });
+      setEditId(null);
+    } catch {
+      toast.error("Failed to save task!");
     }
   };
 
-  //   if(form.appname.length===0 || form.username.length===0 || form.pass.length ===0){
-  //     toast("🦄 Please fill all the fields", {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "dark",
-  //     });
-  //     return;
-  //   }
-  //   console.log(form);
-  //   setPassArray([...passArray, { ...form, id: uuidv4() }]);
-  //   localStorage.setItem(
-  //     "passwords",
-  //     JSON.stringify([...passArray, { ...form, id: uuidv4() }])
-  //   );
-  //   // console.log([...passArray, form]);
-  //   console.log(localStorage.getItem("passwords"));
-  //   const payload = {
-  //     appname: form.appname, // Change to match backend
-  //     username: form.username,
-  //     password: form.pass,  // Change to match backend
-  //   };
-  //   try {
-  //     const res = await axios.post("https://backend-password-manager-production.up.railway.app/api/users/register", payload);
-  //     console.log(res.data);
-  //     toast("🦄 Saved Password", {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "dark",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //     toast("🦄 Error", {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //       theme: "dark",
-  //     });
-  //   }
-  //   setForm({ appname: "", username: "", pass: "" });
+  const toggleCompletion = async (id) => {
+    const task = tasks.find((t) => t._id === id);
+    if (!task) return;
 
-  // };
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    console.log(form);
+    try {
+      await axios.put(`${host}/api/user/update/${id}`, {
+        ...task,
+        completed: !task.completed,
+      });
+      if(!task.completed){
+        toast.success("Task marked as completed!");
+      } else {
+        toast.success("Task marked as incomplete!");
+      }
+      fetchTasks();
+    } catch {
+      toast.error("Failed to update task status!");
+    }
   };
-  const copyText = (params) => {
-    navigator.clipboard.writeText(params);
-    toast("🦄 Copied", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
-  };
+
   const deleteHandler = async () => {
     try {
-      await axios.delete(
-        `https://backend-password-manager-production.up.railway.app/api/users/delete/${idDel}`
-      );
-      let updatedForm = passArray.filter((item) => item.id !== idDel);
-      // setPassArray([...updatedForm]);
-      const { data } = await axios.get(
-        "https://backend-password-manager-production.up.railway.app/api/users"
-      );
-      setPassArray(data);
+      await axios.delete(`${host}/api/user/delete/${idDel}`);
+      fetchTasks();
       setIsModalOpen(false);
-      toast("🦄 Deleted Password", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    } catch (error) {
-      console.error("Error deleting password:", error);
-      toast.error("Error deleting password");
+      toast.success("Task deleted successfully!");
+    } catch {
+      toast.error("Error deleting task");
     }
   };
-  const editHandler = (id) => {
-    const selectedItem = passArray.find((item) => item._id === id);
-    if (!selectedItem) return; // Prevent errors if the item is not found
 
-    setForm({
-      appname: selectedItem.appname,
-      username: selectedItem.username,
-      pass: selectedItem.password, // Ensure correct field names
-    });
-    setEditId(id);
-    // No need to remove the item from the state at this step
+  const editHandler = (id) => {
+    const task = tasks.find((t) => t._id === id);
+    if (task) {
+      setForm({ title: task.title, description: task.description, completed: task.completed });
+      setEditId(id);
+    }
   };
+
   const handleDelete = (id) => {
-    setIddel(id);
+    setIdDel(id);
     setIsModalOpen(true);
-    console.log(id);
   };
+
   return (
-    <>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-32 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] flex flex-col"></div>
-      <div className="container bg-slate-900 mx-auto md:p-10 p-4 py-6 pb-36 rounded-md flex flex-col gap-4 md:mt-16 md:max-h-[70vh] max-h-[90vh] overflow-y-auto">
-        <h1 className="text-white text-center text-2xl md:text-4xl font-bold">
-          <span className="text-green-400">&lt;</span>Pass
-          <span className="text-green-400">Info/&gt;</span>
-        </h1>
-        <p className="text-green-400 text-center text-xl">
-          Your Own Password Manager
-        </p>
-        <div className="text-white flex  flex-col gap-4">
-          <input
-            value={form.appname}
-            onChange={handleChange}
-            placeholder="Enter Your Application Name"
-            className="rounded-lg border-2 w-full outline-green-500 text-green-700 border-green-500 px-4 py-2 text-lg font-semibold"
-            type="text"
-            name="appname"
-            id="appname"
-          />
-          <div className="flex md:flex-row flex-col gap-3 w-full relative">
-            <input
-              value={form.username}
-              onChange={handleChange}
-              placeholder="Enter your Username"
-              className="rounded-lg border-2 w-full outline-green-500 text-green-700 border-green-500 px-4 py-2 text-lg font-semibold"
-              type="text"
-              name="username"
-              id="username"
-            />
-            <input
-              value={form.pass}
-              onChange={handleChange}
-              placeholder="Enter Your Password"
-              className="rounded-lg border-2 w-full outline-green-500 text-green-700 border-green-500 px-4 py-2 text-lg font-semibold
-                "
-              type={show ? "text" : "password"}
-              name="pass"
-              id="pass"
-            />
-            <img
-              ref={ref}
-              className="absolute right-2 top-3 cursor-pointer"
-              src="./icons/view.svg"
-              alt="view"
-              onClick={showPassword}
-            />
-          </div>
-          <button
-            onClick={savePassword}
-            className="bg-green-400 p-3 text-black font-bold rounded-md flex justify-center items-center hover:bg-green-300 transition-all"
-          >
-            <lord-icon
-              src="https://cdn.lordicon.com/jgnvfzqg.json"
-              trigger="hover"
-              className="mr-2"
-            ></lord-icon>
-            Add Password
-          </button>
-          {passArray.length === 0 && (
-            <div className="text-2xl text-center mt-3">
-              No Data Available Till Now
-            </div>
-          )}
-          {passArray.length != 0 && (
-            <table className="table-auto w-full bg-green-100 mt-2 rounded-md overflow-hidden">
-              <thead className="bg-green-700">
+    <div className="container mx-auto p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white rounded-lg shadow-lg">
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <h1 className="text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 animate-pulse">
+        <span className="text-green-400">&lt;</span>Task Manager
+        <span className="text-green-400">/&gt;</span>
+      </h1>
+      <div className="flex flex-col gap-6">
+        <input
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          placeholder="Enter Task Title"
+          className="p-3 rounded-lg border border-green-500 text-black focus:ring-2 focus:ring-green-400 transition-all"
+        />
+        <textarea
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          placeholder="Enter Task Description"
+          className="p-3 rounded-lg border border-green-500 text-black focus:ring-2 focus:ring-green-400 transition-all"
+        />
+        <button
+          onClick={saveTask}
+          className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-black font-bold py-2 px-4 rounded-lg shadow-lg transform hover:scale-105 transition-all"
+        >
+          {editId ? "Update Task" : "Add Task"}
+        </button>
+        {tasks.length === 0 ? (
+          <div className="text-center text-xl mt-4 animate-bounce">No Tasks Available</div>
+        ) : (
+          <div className="overflow-x-auto md:overflow-hidden">
+            <table className="w-full bg-gray-700 rounded-lg shadow-lg">
+              <thead className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
                 <tr>
-                  <th className="md:text-xl text-sm py-3">Application Name</th>
-                  <th className="md:text-xl text-sm py-3">Username</th>
-                  <th className="md:text-xl text-sm py-3">Password</th>
-                  <th className="md:text-xl text-sm py-3">Actions</th>
+                  <th className="py-3 px-4 text-left">Title</th>
+                  <th className="py-3 px-4 text-left">Description</th>
+                  <th className="py-3 px-4 text-center">Completed</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="text-black">
-                {passArray.map((items) => (
-                  <tr key={items._id}>
-                    <td className="py-2 border-1 border-white w-32 text-center">
-                      {items.appname}
+              <tbody>
+                {tasks.map((task) => (
+                  <tr
+                    key={task._id}
+                    className="border-b border-gray-600 hover:bg-gray-600 transition-all"
+                  >
+                    <td
+                      className={`py-3 px-4 ${
+                        task.completed ? "line-through text-gray-400" : ""
+                      }`}
+                    >
+                      {task.title}
                     </td>
-                    <td className="py-2 border-1 w-32 text-center">
-                      <div className="flex items-center justify-center gap-4">
-                        {items.username}
-                        <lord-icon
-                          src="https://cdn.lordicon.com/jyjslctx.json"
-                          trigger="hover"
-                          colors="primary:#000000"
-                          className="cursor-pointer"
-                          onClick={() => {
-                            copyText(items.username);
-                          }}
-                        ></lord-icon>
-                      </div>
+                    <td
+                      className={`py-3 px-4 ${
+                        task.completed ? "line-through text-gray-400" : ""
+                      }`}
+                    >
+                      {task.description}
                     </td>
-                    <td className="py-2 border-1 w-32 text-center">
-                      <div className="flex items-center justify-center gap-4">
-                        {items.password}
-                        <lord-icon
-                          src="https://cdn.lordicon.com/jyjslctx.json"
-                          trigger="hover"
-                          colors="primary:#000000"
-                          className="cursor-pointer"
-                          onClick={() => {
-                            copyText(items.password);
-                          }}
-                        ></lord-icon>
-                      </div>
-                    </td>
-                    <td className="py-2 border-1 w-32 text-center">
-                      <div className="flex justify-center md:flex-row flex-col md:gap-0 gap-2 items-center">
-                        <lord-icon
-                          src="https://cdn.lordicon.com/ifsxxxte.json"
-                          trigger="hover"
-                          colors="primary:blue"
-                          className="md:mr-3 cursor-pointer"
-                          onClick={() => {
-                            editHandler(items._id);
-                          }}
-                        ></lord-icon>
-                        <lord-icon
-                          src="https://cdn.lordicon.com/skkahier.json"
-                          trigger="hover"
-                          colors="primary:red"
-                          className="cursor-pointer"
-                          onClick={() => {
-                            handleDelete(items._id);
-                          }}
-                        ></lord-icon>
-                      </div>
-                      <ConfirmModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onConfirm={() => {
-                          deleteHandler();
-                        }}
-                        message="Are you sure you want to delete?"
+                    <td className="py-3 px-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => toggleCompletion(task._id)}
+                        className="transform scale-125"
                       />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => editHandler(task._id)}
+                        className="text-blue-400 hover:underline mr-4"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(task._id)}
+                        className="text-red-400 hover:underline"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </>
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={deleteHandler}
+        message="Are you sure you want to delete this task?"
+      />
+    </div>
   );
 };
 

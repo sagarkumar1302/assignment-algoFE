@@ -1,13 +1,47 @@
-# React + Vite
+# Frontend Task Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for the Task Manager. It provides a user-friendly interface to manage tasks, including creating, updating, deleting, and marking tasks as completed. The frontend is built using **React.js** and styled with **Tailwind CSS**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- **Add Tasks**: Create new tasks with a title and description.
+- **Edit Tasks**: Update task details or mark tasks as completed.
+- **Delete Tasks**: Remove tasks from the list.
+- **Responsive Design**: Fully responsive UI for mobile and desktop devices.
+- **Real-Time Updates**: Reflects changes instantly after performing actions.
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-![{8CEB72A9-4C32-4F2C-8F1C-45FEE644ECE6}](https://github.com/user-attachments/assets/c4a4d574-7dcb-4d22-86e1-874e3fb3d496)
+---
+
+## Tech Stack
+
+- **React.js**: JavaScript library for building the user interface.
+- **Tailwind CSS**: Utility-first CSS framework for styling.
+- **Axios**: For making API requests to the backend.
+- **React Toastify**: For displaying notifications.
+
+---
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/frontend-task-manager.git
+   cd frontend-task-manager
+2. npm install
+3. Start the development server: npm run dev
+
+
+frontend-algo/
+├── src/
+│   ├── assets/
+│   │   └── Components/
+│   │       └── Manager.jsx       # Main task management component
+│   ├── App.js                    # Entry point of the React app
+│   ├── index.js                  # Renders the React app
+│   └── styles/                   # Tailwind CSS configuration
+├── public/
+│   └── index.html                # HTML template
+├── package.json                  # Project dependencies
+└── [README.md](http://_vscodecontentref_/0)                     # Documentation
